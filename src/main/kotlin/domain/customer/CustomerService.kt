@@ -1,5 +1,9 @@
 package com.example.domain.customer
 
+import com.example.domain.customer.usecases.AddContactUseCase
+import com.example.domain.customer.usecases.AddNoteUseCase
+import com.example.domain.customer.usecases.CreateCustomerUseCase
+import com.example.domain.customer.usecases.GetCustomerUseCase
 import com.example.events.ContactAddedEvent
 import com.example.events.NoteAddedEvent
 import events.EventPublisher
@@ -9,41 +13,12 @@ class CustomerService(
     private val eventPublisher: EventPublisher
 ) {
 
-    fun createCustomer(name: String): Customer {
-        val customer = Customer(name = name)
-        customerRepository.save(customer)
-        return customer
-    }
+    fun createCustomer(name: String): Customer  = CreateCustomerUseCase(customerRepository).invoke(name)
 
-    fun getCustomer(id: Long): Customer? {
-        return customerRepository.findById(CustomerId(id))
-    }
+    fun getCustomer(id: Long): Customer? = GetCustomerUseCase(customerRepository).invoke(id)
 
-    fun addContact(customerId: CustomerId, contact: Contact): Customer? {
-        val customer = customerRepository.findById(customerId)
-            ?: return null
+    fun addContact(customerId: CustomerId, contact: Contact):
+            Customer?  = AddContactUseCase(customerRepository, eventPublisher).invoke(customerId,contact)
 
-        // Business logic to add a contact (could be a method on Customer entity)
-        val updatedCustomer = customer.withContact(contact)
-        customerRepository.save(updatedCustomer)
-
-        // Publish a domain event to signal that a new contact has been added
-        eventPublisher.publish(ContactAddedEvent(customerId, contact))
-
-        return updatedCustomer
-    }
-
-
-    fun addNote(customerId: CustomerId, note: Note): Customer? {
-        val customer = customerRepository.findById(customerId)
-            ?: return null
-
-        val updatedCustomer = customer.withNote(note)
-        customerRepository.save(updatedCustomer)
-
-        // Publish a domain event to signal about a new note
-        eventPublisher.publish(NoteAddedEvent(customerId, note))
-
-        return updatedCustomer
-    }
+    fun addNote(customerId: CustomerId, note: Note): Customer? = AddNoteUseCase(customerRepository,eventPublisher).invoke(customerId,note)
 }

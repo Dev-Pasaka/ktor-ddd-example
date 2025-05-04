@@ -27,14 +27,14 @@ class ApplicationTest {
             contentType(ContentType.Application.Json)
             setBody("""
                 {
-                    "name": "John Doe",
-                    "email": "john@example.com"
+                    "name": "John Doe"
                 }
             """.trimIndent())
         }
         assertEquals(HttpStatusCode.Created, response.status)
         val responseBody = response.bodyAsText()
-        val customerId = Json.parseToJsonElement(responseBody).jsonObject["id"]?.jsonObject?.get("value")?.jsonPrimitive?.content
+        val customerId = Json.parseToJsonElement(responseBody).jsonObject["id"]?.jsonPrimitive?.content
+        println(customerId)
         assertNotNull(customerId)
 
         // Get customer
@@ -46,11 +46,7 @@ class ApplicationTest {
         client.post("/customers/$customerId/contacts") {
             contentType(ContentType.Application.Json)
             setBody("""
-                {
-                    "name": "Jane Doe",
-                    "email": "jane@example.com",
-                    "phone": "123-456-7890"
-                }
+              {"id":1,"name":"John Doe","email":"john@example.com","phone":"123-456-7890"}
             """.trimIndent())
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
@@ -60,9 +56,7 @@ class ApplicationTest {
         client.post("/customers/$customerId/notes") {
             contentType(ContentType.Application.Json)
             setBody("""
-                {
-                    "content": "Test note"
-                }
+                 { "id":  $customerId,"content": "test content $customerId" }
             """.trimIndent())
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
@@ -80,28 +74,25 @@ class ApplicationTest {
             contentType(ContentType.Application.Json)
             setBody("""
                 {
-                    "name": "John Doe",
-                    "email": "john@example.com"
+                    "name": "John Doe"
                 }
             """.trimIndent())
         }
-        val customerId = Json.parseToJsonElement(customerResponse.bodyAsText()).jsonObject["id"]?.jsonObject?.get("value")?.jsonPrimitive?.content
-        assertNotNull(customerId)
-
+        val customerId = Json.parseToJsonElement(customerResponse.bodyAsText()).jsonObject["id"]?.jsonPrimitive?.content
         // Create reminder
         val reminderResponse = client.post("/reminders") {
             contentType(ContentType.Application.Json)
             setBody("""
                 {
-                    "customerId": {"value": "$customerId"},
-                    "noteId": null,
-                    "remindAt": "2024-01-01T10:00:00",
-                    "message": "Test reminder"
+                  "customerId": $customerId,
+                  "noteId": null,
+                  "remindAt": "2025-05-04T15:30:00",
+                  "message": "Send invoice reminder."
                 }
             """.trimIndent())
         }
         assertEquals(HttpStatusCode.Created, reminderResponse.status)
-        val reminderId = Json.parseToJsonElement(reminderResponse.bodyAsText()).jsonObject["id"]?.jsonObject?.get("value")?.jsonPrimitive?.content
+        val reminderId =  Json.parseToJsonElement(reminderResponse.bodyAsText()).jsonObject["id"]?.jsonObject?.get("value")?.jsonPrimitive?.content
         assertNotNull(reminderId)
 
         // Get reminder

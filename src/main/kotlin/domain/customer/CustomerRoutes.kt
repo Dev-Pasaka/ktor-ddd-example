@@ -25,6 +25,7 @@ fun Application.customerRoutes() {
             post {
                 val customer = call.receive<Customer>()
                 val createdCustomer = service.createCustomer(customer.name)
+                println(createdCustomer)
                 call.respond(HttpStatusCode.Created, createdCustomer)
             }
 
@@ -66,6 +67,7 @@ fun Application.customerRoutes() {
                     "Missing or malformed id",
                     status = HttpStatusCode.BadRequest
                 )
+                println(id)
 
                 val note = call.receive<Note>()
                 val updatedCustomer = service.addNote(CustomerId(id), note)
