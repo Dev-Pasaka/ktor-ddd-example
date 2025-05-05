@@ -11,7 +11,7 @@ class AddContactUseCase(
     private val customerRepository: CustomerRepository,
     private val eventPublisher: EventPublisher
 ) {
-    operator fun invoke(customerId: CustomerId, contact: Contact):Customer?{
+    fun execute(customerId: CustomerId, contact: Contact):Customer?{
         val customer = customerRepository.findById(customerId)
             ?: return null
 

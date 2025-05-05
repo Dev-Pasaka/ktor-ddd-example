@@ -1,7 +1,6 @@
 package com.example.domain.customer.usecases
 
 import com.example.domain.customer.*
-import com.example.events.ContactAddedEvent
 import com.example.events.NoteAddedEvent
 import events.EventPublisher
 
@@ -9,7 +8,7 @@ class AddNoteUseCase(
     private val customerRepository: CustomerRepository,
     private val eventPublisher: EventPublisher
 ) {
-    operator fun invoke(customerId: CustomerId, note: Note):Customer?{
+    fun execute(customerId: CustomerId, note: Note):Customer?{
         val customer = customerRepository.findById(customerId)
             ?: return null
 
